@@ -1,12 +1,22 @@
-import { Link } from 'wouter';
+import { useEffect, useState } from "react";
+import { Link } from "wouter";
 
-import Layout from '@/components/Layout';
-import Container from '@/components/Container';
-import EventCard from '@/components/EventCard';
+import { getEvents } from "@/lib/events";
+import { LiveBeatEvent } from "@/types/events";
 
-import events from '@/data/events.json';
+import Layout from "@/components/Layout";
+import Container from "@/components/Container";
+import EventCard from "@/components/EventCard";
 
 function Home() {
+  const [events, setEvents] = useState<Array<LiveBeatEvent> | undefined>();
+  useEffect(() => {
+    (async function run() {
+      const { events } = await getEvents();
+      setEvents(events);
+    })();
+  }, []);
+
   return (
     <Layout>
       {Array.isArray(events) && events.length > 0 && (
@@ -23,7 +33,7 @@ function Home() {
               </Link>
             </p>
           </Container>
-          
+
           <Container>
             <div className="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {events.map((event) => {
@@ -32,18 +42,18 @@ function Home() {
                     <a>
                       <EventCard
                         date={event.date}
-                        image={{
-                          alt: '',
-                          height: event.imageHeight,
-                          url: event.imageUrl,
-                          width: event.imageWidth
-                        }}
+                        // image={{
+                        //   alt: "",
+                        //   height: event.imageHeight,
+                        //   url: event.imageUrl,
+                        //   width: event.imageWidth,
+                        // }}
                         location={event.location}
                         name={event.name}
                       />
                     </a>
                   </Link>
-                )
+                );
               })}
             </div>
           </Container>
@@ -56,15 +66,13 @@ function Home() {
           </p>
           <p className="w-100 text-center">
             <Link href="/events/new">
-              <a>
-                Add an Event
-              </a>
+              <a>Add an Event</a>
             </Link>
           </p>
         </Container>
       )}
     </Layout>
-  )
+  );
 }
 
 export default Home;
