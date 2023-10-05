@@ -1,4 +1,4 @@
-import { Models } from "appwrite";
+import { Models, ID } from "appwrite";
 import { databases } from "@/lib/appwrite";
 import { LiveBeatEvent } from "@/types/events";
 
@@ -17,6 +17,18 @@ export async function getEventById(eventId: string) {
     import.meta.env.VITE_APPWRITE_EVENTS_DATABASES_ID,
     import.meta.env.VITE_APPWRITE_EVENTS_COLLECTIONS_ID,
     eventId
+  );
+  return {
+    event: mapDocumentToEvent(document),
+  };
+}
+
+export async function createEvent(event: Omit<LiveBeatEvent, "$id">) {
+  const document = await databases.createDocument(
+    import.meta.env.VITE_APPWRITE_EVENTS_DATABASES_ID,
+    import.meta.env.VITE_APPWRITE_EVENTS_COLLECTIONS_ID,
+    ID.unique(),
+    event
   );
   return {
     event: mapDocumentToEvent(document),
