@@ -41,6 +41,9 @@ function mapDocumentToEvent(document: Models.Document) {
     name: document.name,
     location: document.location,
     date: document.date,
+    imageHeight: document.imageHeight,
+    imageWidth: document.imageWidth,
+    imageFileId: document.imageFileId,
   };
   return event;
 }
