@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import { Redirect } from 'wouter';
 import Layout from '@/components/Layout';
 import Container from '@/components/Container';
 import FormRow from '@/components/FormRow';
 import FormLabel from '@/components/FormLabel';
 import InputText from '@/components/InputText';
 import Button from '@/components/Button';
-import { logIn } from '@/lib/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 function LogIn() {
+  const { session, logIn } = useAuth();
   const [sent, setSent] = useState(false);
 
   async function handleOnSubmit(e: React.SyntheticEvent) {
@@ -18,6 +20,10 @@ function LogIn() {
     await logIn(target.email.value);
 
     setSent(true);
+  }
+
+  if ( session ) {
+    return <Redirect to="/" />
   }
 
   return (

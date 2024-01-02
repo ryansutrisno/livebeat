@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import Container from '@/components/Container';
-import { verifySession } from '@/lib/auth';
+import { useAuth } from '@/hooks/use-auth';
 
 function Session() {
+  const { verifySession } = useAuth();
   const [, navigate] = useLocation();
   useEffect(() => {
     const params =  new URLSearchParams(window.location.search);
@@ -16,11 +17,12 @@ function Session() {
     }
     
     (async function run() {
-      await verifySession(userId, secret);
+      await verifySession({userId, secret});
       navigate('/');
     })();
     
   }, []);
+  
   return (
     <Container className="h-screen flex items-center justify-center text-center">
       <p>Logging you in...</p>
