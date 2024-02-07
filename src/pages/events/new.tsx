@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AppwriteException } from 'appwrite';
 import { useLocation } from "wouter";
 import Layout from "@/components/Layout";
 import Container from "@/components/Container";
@@ -20,7 +21,6 @@ interface LiveBeatImage {
 
 function EventNew() {
   const [, navigate] = useLocation();
-  const [error] = useState<string>();
   const [image, setImage] = useState<LiveBeatImage>();
 
   function handleOnChange(event: React.FormEvent<HTMLInputElement>) {
@@ -47,29 +47,36 @@ function EventNew() {
   async function handleOnSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
 
-    const target = e.target as typeof e.target & {
-      name: { value: string };
-      location: { value: string };
-      date: { value: string };
-    };
+    try {
+      const target = e.target as typeof e.target & {
+        name: { value: string };
+        location: { value: string };
+        date: { value: string };
+      }
 
-    let file;
+      let file;
 
-    if (image?.file) {
-      file = await uploadFile(image.file);
-    }
+      if ( image?.file ) {
+        file = await uploadFile(image.file);
+      }
 
-    const result = await createEvent({
-      name: target.name.value,
-      location: target.location.value,
-      date: new Date(target.date.value).toISOString(),
-      imageHeight: image?.height,
-      imageWidth: image?.width,
-      imageFileId: file?.$id,
-    });
-
-    navigate(`/event/${result.event.$id}`);
+      const results = await createEvent({
+        name: target.name.value,
+        location: target.location.value,
+        date: new Date(target.date.value).toISOString(),
+        imageFileId: file?.$id,
+        imageHeight: image?.height,
+        imageWidth: image?.width
+      })
+      navigate(`/event/${results.event.$id}`);
+    } catch(error: unknown) {
+      if ( error instanceof AppwriteException ) {
+        navigate(`${window.location.pathname}?error=${error.type}`)
+      } else {
+        navigate(`${window.location.pathname}?error=unknown_error`)
+      }
   }
+}
 
   return (
     <Layout>
@@ -115,8 +122,6 @@ function EventNew() {
           </FormRow>
 
           <Button>Submit</Button>
-
-          {error && <p className="bg-red-50 p-4 mt-6 rounded">{error}</p>}
         </form>
       </Container>
     </Layout>

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { AppwriteException } from 'appwrite';
 import { useLocation } from 'wouter';
 import Container from '@/components/Container';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,8 +18,16 @@ function Session() {
     }
     
     (async function run() {
-      await verifySession({userId, secret});
-      navigate('/');
+      try {
+        await verifySession({ userId, secret });
+        navigate('/');
+      } catch(error) {
+        if ( error instanceof AppwriteException) {
+          navigate(`/login?error=${error.type}`)
+        } else {
+          navigate(`/login?error=unknown_error`)
+        }
+      }
     })();
     
   }, []);

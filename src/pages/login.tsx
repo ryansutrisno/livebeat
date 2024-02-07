@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Redirect } from 'wouter';
+import { AppwriteException } from 'appwrite';
+import { Redirect, useLocation } from 'wouter'
 import Layout from '@/components/Layout';
 import Container from '@/components/Container';
 import FormRow from '@/components/FormRow';
@@ -9,6 +10,7 @@ import Button from '@/components/Button';
 import { useAuth } from '@/hooks/use-auth';
 
 function LogIn() {
+  const [, navigate] = useLocation();
   const { session, logIn } = useAuth();
   const [sent, setSent] = useState(false);
 
@@ -17,9 +19,16 @@ function LogIn() {
     const target = e.target as typeof e.target & {
       email: { value: string };
     };
-    await logIn(target.email.value);
-
-    setSent(true);
+    try {
+      await logIn(target.email.value);
+      setSent(true);
+    } catch(error: unknown) {
+      if ( error instanceof AppwriteException ) {
+        navigate(`${window.location.pathname}?error=${error.type}`)
+      } else {
+        navigate(`${window.location.pathname}?error=unknown_error`)
+      }
+    }
   }
 
   if ( session ) {

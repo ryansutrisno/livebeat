@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "wouter";
-
+import { Link, useLocation } from "wouter";
+import { AppwriteException } from 'appwrite';
 import { useAuth } from "@/hooks/use-auth";
 import { getEvents } from "@/lib/events";
 import { getPreviewImageById } from "@/lib/storage";
@@ -11,13 +11,22 @@ import Container from "@/components/Container";
 import EventCard from "@/components/EventCard";
 
 function Home() {
+  const [, navigate] = useLocation();
   const { session } = useAuth();
   const [events, setEvents] = useState<Array<LiveBeatEvent> | undefined>();
 
   useEffect(() => {
     (async function run() {
-      const { events } = await getEvents();
-      setEvents(events);
+      try {
+        const { events } = await getEvents();
+        setEvents(events);
+      } catch(error: unknown) {
+        if ( error instanceof AppwriteException ) {
+          navigate(`${window.location.pathname}?error=${error.type}`)
+        } else {
+          navigate(`${window.location.pathname}?error=unknown_error`)
+        }
+      }
     })();
   }, []);
 
